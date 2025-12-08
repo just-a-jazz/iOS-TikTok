@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Reel: Identifiable {
+struct Reel: Identifiable, Equatable {
     var id = UUID().uuidString
     var url: URL
     var isLiked: Bool = false

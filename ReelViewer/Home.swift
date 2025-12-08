@@ -12,13 +12,13 @@ struct Home: View {
     let safeArea: EdgeInsets
     
     @State private var reelManager = ReelManager()
-    @State private var scrollPosition: String?
+    @State private var activeReelId: String?
     
     var body: some View {
         ScrollView(.vertical) {
-            LazyVStack(spacing: 0){
+            LazyVStack(spacing: 0) {
                 ForEach(reelManager.reels) { reel in
-                    ReelView(size: size, safeArea: safeArea, reel: reel)
+                    ReelView(size: size, safeArea: safeArea, reel: reel, activeReelId: $activeReelId)
 //                        .frame(maxWidth: .infinity)
 //                        .containerRelativeFrame(.vertical)
                         .id(reel.id)
@@ -27,17 +27,20 @@ struct Home: View {
             }
             .scrollTargetLayout()
         }
-        .onChange(of: scrollPosition) { _, newValue in
-            print("Changed scroll position to \(newValue ?? "unknown")")
-        }
         .scrollIndicators(.hidden)
         .scrollTargetBehavior(.paging)
         .background(.black)
         .environment(\.colorScheme, .dark)
-        .scrollPosition(id: $scrollPosition)
+        .scrollPosition(id: $activeReelId)
         .onAppear {
             Task {
                 try await reelManager.loadReels()
+            }
+        }
+        .onChange(of: reelManager.reels) {
+            if activeReelId == nil,
+               let first = reelManager.reels.first {
+                activeReelId = first.id
             }
         }
         
