@@ -12,40 +12,41 @@ struct ReelView: View {
     let size: CGSize
     let safeArea: EdgeInsets
     let reel: Reel
+    let reelPlayer: ReelPlayer
     
-    @State var player: AVPlayer
     @Binding var activeReelId: String?
     
-    init(size: CGSize, safeArea: EdgeInsets, reel: Reel, activeReelId: Binding<String?>) {
+    init(size: CGSize, safeArea: EdgeInsets, reel: Reel, reelPlayer: ReelPlayer, activeReelId: Binding<String?>) {
         self.size = size
         self.safeArea = safeArea
         self.reel = reel
         
-        self._player = State(initialValue: AVPlayer(url: reel.url))
+        // Create a stable Playback Coordinator instance per ReelView identity
+        self.reelPlayer = reelPlayer
         self._activeReelId = activeReelId
     }
     
     var body: some View {
-        ReelPlayerView(player: player)
+        ReelPlayerView(player: reelPlayer.player)
             .onChange(of: activeReelId) {
                 guard let activeReelId else { return }
 
                 if activeReelId == self.reel.id {
-                    player.play()
+                    reelPlayer.play()
                 } else {
-                    player.pause()
+                    reelPlayer.pause()
                 }
             }
             .onTapGesture {
-                switch player.timeControlStatus {
+                switch reelPlayer.timeControlStatus {
                 case .paused:
-                    player.play()
+                    reelPlayer.play()
                 case .waitingToPlayAtSpecifiedRate:
                     print("Buffering...")
                     break
                 case .playing:
-                    player.pause()
-                default:
+                    reelPlayer.pause()
+                @unknown default:
                     break
                 }
             }

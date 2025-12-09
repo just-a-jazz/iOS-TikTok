@@ -18,7 +18,13 @@ struct Home: View {
         ScrollView(.vertical) {
             LazyVStack(spacing: 0) {
                 ForEach(reelManager.reels) { reel in
-                    ReelView(size: size, safeArea: safeArea, reel: reel, activeReelId: $activeReelId)
+                    ReelView(
+                        size: size,
+                        safeArea: safeArea,
+                        reel: reel,
+                        reelPlayer: reelManager.player(for: reel),
+                        activeReelId: $activeReelId
+                    )
 //                        .frame(maxWidth: .infinity)
 //                        .containerRelativeFrame(.vertical)
                         .id(reel.id)

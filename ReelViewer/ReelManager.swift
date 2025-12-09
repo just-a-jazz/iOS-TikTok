@@ -16,6 +16,8 @@ class ReelManager {
     static let cdnUrl = URL(string: "https://cdn.dev.airxp.app/AgentVideos-HLS-Progressive/manifest.json")!
     var reels = [Reel]()
     
+    private var reelPlayers = [String: ReelPlayer]()
+    
     func loadReels() async throws {
         let (data, _) = try await URLSession.shared.data(from: Self.cdnUrl)
         
@@ -31,6 +33,15 @@ class ReelManager {
         } else {
             print("Couldn't decode JSON for reels")
         }
-        
+    }
+    
+    func player(for reel: Reel) -> ReelPlayer {
+        if let existingPlayer = reelPlayers[reel.id] {
+            return existingPlayer
+        } else {
+            let newPlayer = ReelPlayer(url: reel.url)
+            reelPlayers[reel.id] = newPlayer
+            return newPlayer
+        }
     }
 }
