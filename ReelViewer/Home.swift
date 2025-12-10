@@ -22,22 +22,18 @@ struct Home: View {
                         size: size,
                         safeArea: safeArea,
                         reel: reel,
-                        reelPlayer: reelManager.player(for: reel),
-                        activeReelId: $activeReelId
+                        reelPlayer: reelManager.playerForRender(for: reel)
                     )
-//                        .frame(maxWidth: .infinity)
-//                        .containerRelativeFrame(.vertical)
-                        .id(reel.id)
-                        .containerRelativeFrame([.vertical, .horizontal])
+                    .id(reel.id)
+                    .containerRelativeFrame([.vertical, .horizontal])
                 }
             }
             .scrollTargetLayout()
         }
-        .scrollIndicators(.hidden)
-        .scrollTargetBehavior(.paging)
-        .background(.black)
-        .environment(\.colorScheme, .dark)
         .scrollPosition(id: $activeReelId)
+        .scrollTargetBehavior(.paging)
+        .scrollIndicators(.hidden)
+        .background(.black)
         .onAppear {
             Task {
                 try await reelManager.loadReels()
@@ -49,7 +45,10 @@ struct Home: View {
                 activeReelId = first.id
             }
         }
-        
+        .onChange(of: activeReelId) { oldReelId, newReelId in
+            reelManager.handleActiveReelChange(from: oldReelId, to: newReelId)
+        }
+        .scrollDisabled(!reelManager.isReadyForPlayback)
     }
 }
 

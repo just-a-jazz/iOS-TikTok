@@ -15,7 +15,6 @@ struct ReelPlayerView: UIViewControllerRepresentable {
         let controller = AVPlayerViewController()
         controller.player = player
         controller.showsPlaybackControls = false
-//        controller.exitsFullScreenWhenPlaybackEnds = true
         controller.videoGravity = .resizeAspectFill
         return controller
     }
