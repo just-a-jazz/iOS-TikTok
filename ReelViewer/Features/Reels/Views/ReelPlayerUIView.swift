@@ -1,5 +1,5 @@
 //
-//  ReelPlayerView.swift
+//  ReelPlayerUIView.swift
 //  ReelViewer
 //
 //  Created by Jazz Siddiqui on 2025-12-07.
@@ -8,7 +8,7 @@
 import AVKit
 import SwiftUI
 
-struct ReelPlayerView: UIViewControllerRepresentable {
+struct ReelPlayerUIView: UIViewControllerRepresentable {
     var player: AVPlayer
     
     func makeUIViewController(context: Context) ->  AVPlayerViewController {

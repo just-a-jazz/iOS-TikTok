@@ -8,12 +8,13 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var viewModel = ReelFeedViewModel()
+    
     var body: some View {
         GeometryReader { geometry in
-            let size = geometry.size
             let safeArea = geometry.safeAreaInsets
             
-            Home(size: size, safeArea: safeArea)
+            Home(viewModel: viewModel, safeArea: safeArea)
                 .ignoresSafeArea()
         }
     }

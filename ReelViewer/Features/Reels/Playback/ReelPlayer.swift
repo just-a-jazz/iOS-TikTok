@@ -65,20 +65,6 @@ class ReelPlayer: ObservableObject {
         }
     }
     
-    func handleTapGesture() {
-        switch player.timeControlStatus {
-        case .paused:
-            play()
-        case .waitingToPlayAtSpecifiedRate:
-            print("Buffering...")
-            break
-        case .playing:
-            pause()
-        @unknown default:
-            break
-        }
-    }
-    
     // MARK: - Looping
 
     private func setUpLooping() {
@@ -128,16 +114,16 @@ class ReelPlayer: ObservableObject {
         switch status {
         case .active:
             // Prioritize smooth playback for the active reel onscreen
-            item.preferredForwardBufferDuration = 10  // seconds
-            item.preferredPeakBitRate = 0             // no cap (best available)
+            item.preferredForwardBufferDuration = ReelPlayerStatusConfig.activeBufferDuration
+            item.preferredPeakBitRate = ReelPlayerStatusConfig.activePeakBitRate
         case .neighbor:
             // Ensure neighbor of current reel are at good enough settings
-            item.preferredForwardBufferDuration = 7  // seconds
-            item.preferredPeakBitRate = 0             // no cap (best available)
+            item.preferredForwardBufferDuration = ReelPlayerStatusConfig.neighborBufferDuration
+            item.preferredPeakBitRate = ReelPlayerStatusConfig.neighborPeakBitRate
         case .prefetchFar:
             // Warm up further away reels with judicious settings
-            item.preferredForwardBufferDuration = 5
-            item.preferredPeakBitRate = 4_000_000     // ~4 Mbps
+            item.preferredForwardBufferDuration = ReelPlayerStatusConfig.prefetchFarBufferDuration
+            item.preferredPeakBitRate = ReelPlayerStatusConfig.prefetchFarPeakBitRate
         case .idle:
             // Stop buffering for reels that are far away enough
             item.preferredForwardBufferDuration = 0
