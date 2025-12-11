@@ -43,6 +43,10 @@ class ReelPlayer: ObservableObject {
     
 
     // MARK: - Playback API
+    
+    var timeControlStatus: AVPlayer.TimeControlStatus {
+        player.timeControlStatus
+    }
 
     func play() {
         player.play()

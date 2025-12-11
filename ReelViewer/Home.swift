@@ -14,15 +14,18 @@ struct Home: View {
     @State private var reelManager = ReelManager()
     @State private var activeReelId: String?
     
+    @State private var isTyping = false
+    
     var body: some View {
         ScrollView(.vertical) {
             LazyVStack(spacing: 0) {
-                ForEach(reelManager.reels) { reel in
+                ForEach($reelManager.reels) { $reel in
                     ReelView(
                         size: size,
                         safeArea: safeArea,
-                        reel: reel,
-                        reelPlayer: reelManager.playerForRender(for: reel)
+                        reel: $reel,
+                        reelPlayer: reelManager.playerForRender(for: reel),
+                        isTyping: $isTyping
                     )
                     .id(reel.id)
                     .containerRelativeFrame([.vertical, .horizontal])
@@ -37,18 +40,16 @@ struct Home: View {
         .onAppear {
             Task {
                 try await reelManager.loadReels()
-            }
-        }
-        .onChange(of: reelManager.reels) {
-            if activeReelId == nil,
-               let first = reelManager.reels.first {
-                activeReelId = first.id
+                if activeReelId == nil,
+                   let first = reelManager.reels.first {
+                    activeReelId = first.id
+                }
             }
         }
         .onChange(of: activeReelId) { oldReelId, newReelId in
             reelManager.handleActiveReelChange(from: oldReelId, to: newReelId)
         }
-        .scrollDisabled(!reelManager.isReadyForPlayback)
+        .scrollDisabled(!reelManager.isReadyForPlayback || isTyping)
     }
 }
 
