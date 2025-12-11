@@ -20,7 +20,7 @@ enum UIConstants {
         static var maxHeight: CGFloat { lineHeight * 5 + paddingV * 2 }
         
         // Distance of swipe in text box before keyboard is dismissed
-        static let scrollOffsetToDismiss: CGFloat = 50
+        static let scrollOffsetToDismiss: CGFloat = 40
         
         static let cornerRadius: CGFloat = 30
         
