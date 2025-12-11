@@ -26,7 +26,7 @@ Architecture notes for the proof‑of‑concept infinitely scrolling reel feed w
 - **Failure handling**: Errors surface to `errorMessage`; retry/backoff and offline cache are not yet implemented.
 
 ## Inline messaging UX & focus management
-- **Hybrid text control**: `InlineMessagingBar` embeds a UIKit `UITextView` (`GrowingTextView`) to get reliable multi‑line growth and internal scrolling after 5 lines, while the surrounding view stays SwiftUI. Alternative: a pure SwiftUI `TextEditor` would improve view hierarchy/readability and allow for simple state management through bindings, but offers less precise sizing and keyboard control.
+- **Hybrid text control**: `InlineMessagingBar` embeds a UIKit `UITextView` (`GrowingTextView`) to get reliable multi‑line growth and internal scrolling after 5 lines, while the surrounding view stays SwiftUI. A separate messaging bar is created for each reel to allow users to input messages, scroll away, and come back to their unfinished message. Alternative: a pure SwiftUI `TextEditor` would improve view hierarchy/readability and allow for simple state management through bindings, but offers less precise sizing and keyboard control.
 - **Focus rules**: The composer drives `viewModel.isTyping`; when focused, `ScrollView` is disabled and the active player is paused. Unfocusing resumes playback. This matches the requirement that swipes should scroll text, and not the feed.
 - **Keyboard ergonomics**: The bar pins above the keyboard via safe‑area padding, the feed stays stationary, and the video is dimmed while typing. Reaction buttons fade/move out when focused; the send button only appears with non‑empty text, and expands with the bar.
 - **Input behavior**: Send trims/clears text, hides keyboard, and calls `onSend`. Placeholder is low‑opacity white; accessibility labels added for input and actions.
@@ -37,5 +37,6 @@ Architecture notes for the proof‑of‑concept infinitely scrolling reel feed w
 - **Loop continuity**: Manual loop avoids flashes at end of item and keeps timeline stable during reuse.
 
 ## Future expansions
+- Clean up code further so that `reels` and `activeReelId` isn't being duplicated to `ReelPlaybackCoordinator`
 - Improve network resilience (retry, offline caching, HLS asset prewarming) and adopt `AVPlayerItemPreferredForwardBufferDuration` tuning per network conditions.
 - Tune scroll physics with a custom gesture recognizer if finer velocity control is needed.
