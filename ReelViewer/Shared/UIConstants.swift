@@ -19,6 +19,9 @@ enum UIConstants {
         // Cap to 5 lines of text
         static var maxHeight: CGFloat { lineHeight * 5 + paddingV * 2 }
         
+        // Distance of swipe in text box before keyboard is dismissed
+        static let scrollOffsetToDismiss: CGFloat = 50
+        
         static let cornerRadius: CGFloat = 30
         
         static let outerPadding: CGFloat = 12

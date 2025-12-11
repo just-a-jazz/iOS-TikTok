@@ -159,6 +159,7 @@ struct InlineMessagingBar: View {
             )
             textView.textContainer.lineFragmentPadding = 0
             textView.keyboardDismissMode = .interactive
+            textView.showsVerticalScrollIndicator = false
             textView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
             return textView
         }
@@ -205,6 +206,24 @@ struct InlineMessagingBar: View {
             func textViewDidChange(_ textView: UITextView) {
                 parent.text = textView.text
                 parent.updateHeight(textView)
+            }
+
+            func scrollViewDidScroll(_ scrollView: UIScrollView) {
+                guard
+                    let textView = scrollView as? UITextView,
+                    textView.isFirstResponder,
+                    scrollView.contentSize.height > scrollView.bounds.height
+                else { return }
+
+                // Only dismiss once the user has scrolled a meaningful distance.
+                if scrollView.bounces &&
+                    scrollView.contentOffset.y < -UIConstants.MessagingBar.scrollOffsetToDismiss {
+                    DispatchQueue.main.async { [weak self] in
+                        self?.parent.isFirstResponder = false
+                        self?.parent.onFocusChange(false)
+                        textView.resignFirstResponder()
+                    }
+                }
             }
 
             func textViewDidBeginEditing(_ textView: UITextView) {
