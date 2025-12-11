@@ -52,7 +52,7 @@ struct ReelView: View {
     private var reelPlayerLayer: some View {
         if let reelPlayer {
             ReelPlayerView(
-                player: reelPlayer.player,
+                reelPlayer: reelPlayer,
                 composerFocused: composerFocused,
                 onTap: handleTapGesture
             )
@@ -63,18 +63,28 @@ struct ReelView: View {
 }
 
 private struct ReelPlayerView: View {
-    let player: AVPlayer
+    let reelPlayer: ReelPlayer
     let composerFocused: Bool
     let onTap: () -> Void
+    
+    private var isReady: Bool { reelPlayer.isReadyToPlay }
 
     var body: some View {
         ZStack {
-            ReelPlayerUIView(player: player)
+            ReelPlayerUIView(player: reelPlayer.player)
                 // prevent highlighting of text in reels
                 .allowsHitTesting(false)
             Color.black
                 .opacity(composerFocused ? 0.8 : 0)
                 .animation(.easeOut(duration: 0.2), value: composerFocused)
+                .animation(.easeOut(duration: 0.2), value: isReady)
+                .overlay {
+                    if !isReady {
+                        ProgressView()
+                            .controlSize(.large)
+                            .tint(.white)
+                    }
+                }
             Color.clear
                 .contentShape(Rectangle())
                 .onTapGesture(perform: onTap)

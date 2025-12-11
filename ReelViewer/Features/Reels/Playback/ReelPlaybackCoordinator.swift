@@ -25,19 +25,12 @@ class ReelPlaybackCoordinator {
         reels.firstIndex(where: { $0.id == reelID })
     }
 
-    var isReadyForPlayback: Bool {
-        if let activeReelId {
-            return reelPlayers[activeReelId]?.isReadyToPlay ?? false
-        }
-        return false
-    }
-
     func updateReels(_ newReels: [Reel]) {
         reels = newReels
         prunePlayersNotInReels()
     }
 
-    func handleActiveReelChange(from oldID: String?, to newID: String?) {
+    func handleActiveReelChange(from oldID: String?, to newID: String?, with completionHandler: @escaping () -> Void) {
         guard let newID,
               let newIndex = index(for: newID) else {
             return
@@ -63,7 +56,7 @@ class ReelPlaybackCoordinator {
                 player.status = .active
             } else if index == newIndex - 1 || index == newIndex + 1 {
                 player.status = .neighbor
-            } else if index > newIndex + 1 {
+            } else if index > newIndex + 1 || index < newIndex - 1 {
                 player.status = .prefetchFar
             } else {
                 player.status = .idle
@@ -77,14 +70,15 @@ class ReelPlaybackCoordinator {
         currentPlayer.whenReadyToPlay { [weak self] in
             guard self?.activeReelId == newID else { return }
             currentPlayer.play()
+            completionHandler()
         }
     }
     
     // Build the window of reels we want to keep alive
     private var windowIndices: ClosedRange<Int>? {
         guard let activeReelId, let activeIndex = index(for: activeReelId) else { return nil }
-        let lower = max(0, activeIndex - Self.prefetchBehindCount)
-        let upper = min(reels.count - 1, activeIndex + Self.prefetchAheadCount)
+        let lower = max(0, activeIndex - PrefetchConfig.prefetchBehindCount)
+        let upper = min(reels.count - 1, activeIndex + PrefetchConfig.prefetchAheadCount)
         return lower...upper
     }
 
@@ -99,8 +93,8 @@ class ReelPlaybackCoordinator {
     }
 
     private func ensurePlayer(for reel: Reel) -> ReelPlayer {
-        guard Self.poolSize > 0 else {
-            fatalError("Pool size misconfigured. No reels can play without a player.")
+        guard PrefetchConfig.playerPoolSize > PrefetchConfig.prefetchAheadCount + PrefetchConfig.prefetchBehindCount else {
+            fatalError("Pool size misconfigured. Reels can't be fetched without enough players.")
         }
 
         // 1. Return a player if one has already been created for this reel
@@ -109,7 +103,7 @@ class ReelPlaybackCoordinator {
         }
 
         // 2. If the pool is not full yet, create a new player and add it.
-        if reelPlayers.count < Self.poolSize {
+        if reelPlayers.count < PrefetchConfig.playerPoolSize {
             let newPlayer = ReelPlayer(reel: reel)
             reelPlayers[reel.id] = newPlayer
             return newPlayer
@@ -164,12 +158,4 @@ class ReelPlaybackCoordinator {
         let validIds = Set(reels.map(\.id))
         reelPlayers = reelPlayers.filter { validIds.contains($0.key) }
     }
-}
-
-// MARK: Constants for managing prefetch logic
-private extension ReelPlaybackCoordinator {
-    static let poolSize = 4
-
-    static var prefetchAheadCount: Int { 2 }
-    static var prefetchBehindCount: Int { 1 }
 }

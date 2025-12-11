@@ -22,6 +22,10 @@ class ReelFeedViewModel {
     var isLoading = false
     var errorMessage: String?
 
+    var hasReadyAnchor: Bool {
+        lastReadyReelId != nil
+    }
+
     func indexOfReel(_ reelId: String) -> Int? {
         reels.firstIndex { $0.id == reelId }
     }

@@ -114,16 +114,16 @@ class ReelPlayer: ObservableObject {
         switch status {
         case .active:
             // Prioritize smooth playback for the active reel onscreen
-            item.preferredForwardBufferDuration = ReelPlayerStatusConfig.activeBufferDuration
-            item.preferredPeakBitRate = ReelPlayerStatusConfig.activePeakBitRate
+            item.preferredForwardBufferDuration = PrefetchConfig.activeBufferDuration
+            item.preferredPeakBitRate = PrefetchConfig.activePeakBitRate
         case .neighbor:
             // Ensure neighbor of current reel are at good enough settings
-            item.preferredForwardBufferDuration = ReelPlayerStatusConfig.neighborBufferDuration
-            item.preferredPeakBitRate = ReelPlayerStatusConfig.neighborPeakBitRate
+            item.preferredForwardBufferDuration = PrefetchConfig.neighborBufferDuration
+            item.preferredPeakBitRate = PrefetchConfig.neighborPeakBitRate
         case .prefetchFar:
             // Warm up further away reels with judicious settings
-            item.preferredForwardBufferDuration = ReelPlayerStatusConfig.prefetchFarBufferDuration
-            item.preferredPeakBitRate = ReelPlayerStatusConfig.prefetchFarPeakBitRate
+            item.preferredForwardBufferDuration = PrefetchConfig.prefetchFarBufferDuration
+            item.preferredPeakBitRate = PrefetchConfig.prefetchFarPeakBitRate
         case .idle:
             // Stop buffering for reels that are far away enough
             item.preferredForwardBufferDuration = 0

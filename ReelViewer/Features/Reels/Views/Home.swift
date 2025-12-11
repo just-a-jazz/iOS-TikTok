@@ -43,9 +43,19 @@ struct Home: View {
             }
         }
         .onChange(of: viewModel.activeReelId) { oldReelId, newReelId in
-            viewModel.setActiveReel(from: oldReelId, to: newReelId)
+            handleActiveReelChange(from: oldReelId, to: newReelId)
         }
-        .scrollDisabled(!viewModel.isReadyForPlayback || viewModel.isTyping)
+        .scrollDisabled(viewModel.isTyping || !viewModel.hasReadyAnchor)
+    }
+
+    private func handleActiveReelChange(from oldId: String?, to newId: String?) {
+        guard let newId else { return }
+
+        if let fallback = viewModel.resolveActiveReelChange(from: oldId, to: newId) {
+            withAnimation {
+                viewModel.activeReelId = fallback
+            }
+        }
     }
 }
 
