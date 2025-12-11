@@ -14,14 +14,24 @@ class ReelFeedViewModel {
     private let playbackCoordinator: ReelPlaybackCoordinator = ReelPlaybackCoordinator()
 
     var reels: [Reel] = []
-    // Track the active reel ID for policy decisions
+    // Track the active reel ID and last ready reel ID for policy decisions
     var activeReelId: String?
+    private var lastReadyReelId: String?
+    
     var isTyping = false
     var isLoading = false
     var errorMessage: String?
 
-    var isReadyForPlayback: Bool {
-        playbackCoordinator.isReadyForPlayback
+    func indexOfReel(_ reelId: String) -> Int? {
+        reels.firstIndex { $0.id == reelId }
+    }
+
+    func isReelReady(for reelId: String) -> Bool {
+        guard let reel = reels.first(where: { $0.id == reelId }),
+              let player = playbackCoordinator.player(for: reel) else {
+            return false
+        }
+        return player.isReadyToPlay
     }
 
     func loadReels() async {
@@ -41,9 +51,44 @@ class ReelFeedViewModel {
         }
     }
 
-    func setActiveReel(from oldID: String?, to newID: String?) {
+    /// Resolves an attempted active-reel change. Returns a fallback ID if the change should be blocked.
+    func resolveActiveReelChange(from oldID: String?, to newID: String?) -> String? {
+        guard let newID else { return nil }
+
+        if shouldBlockChange(to: newID) {
+            return oldID ?? lastReadyReelId
+        }
+
+        applyActiveReelChange(from: oldID, to: newID)
+        return nil
+    }
+
+    private func shouldBlockChange(to newID: String) -> Bool {
+        guard let anchorID = lastReadyReelId ?? activeReelId,
+              let anchorIndex = indexOfReel(anchorID),
+              let newIndex = indexOfReel(newID) else {
+            return false
+        }
+        
+        // If the new reel isn't ready, block access to reels further than the non-ready reel.
+        let distance = abs(newIndex - anchorIndex)
+        let isNewReady = isReelReady(for: newID)
+
+        return !isNewReady && distance > 1
+    }
+    
+    private func applyActiveReelChange(from oldID: String?, to newID: String) {
         activeReelId = newID
-        playbackCoordinator.handleActiveReelChange(from: oldID, to: newID)
+        playbackCoordinator.handleActiveReelChange(from: oldID, to: newID) { [weak self] in
+            self?.updateLastReadyAnchorIfNeeded()
+        }
+    }
+
+    private func updateLastReadyAnchorIfNeeded() {
+        guard let currentId = activeReelId else {
+            return
+        }
+        lastReadyReelId = currentId
     }
 
     func player(for reel: Reel) -> ReelPlayer? {
