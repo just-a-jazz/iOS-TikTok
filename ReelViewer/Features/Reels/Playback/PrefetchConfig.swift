@@ -22,4 +22,7 @@ struct PrefetchConfig {
 
     static let prefetchFarBufferDuration: TimeInterval = 5
     static let prefetchFarPeakBitRate: Double = 4_000_000  // ~4 Mbps
+    
+    // How much to buffer to maintan seamless looping for current reel at a high quality
+    static let nextLoopForwardBufferDuration: TimeInterval = 2.0
 }

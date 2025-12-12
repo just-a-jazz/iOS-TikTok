@@ -12,7 +12,7 @@ Architecture notes for the proof‑of‑concept infinitely scrolling reel feed w
 - **Paging feed**: Pure SwiftUI scroll view provides natural scroll physics and smooth transitions avoiding UIKit complexity while allowing `.scrollPosition(id:)` to keep the active reel in sync with playback. Tradeoff: Scrolling past currently loading reels causes subtle snapping animation that can feel glitchy if network is very bad. Creating a custom gesture solution would solve this but increase code and view complexity.
 - **Active reel gating**: `ReelFeedViewModel.resolveActiveReelChange` blocks jumps beyond a not‑ready reel and falls back to the last loaded reel. This keeps UX responsive (no black frames) at the cost of occasionally “snapping back” if the user scrolls faster than readiness.
 - **Loading & readiness overlay**: `ReelView` overlays a spinner until `ReelPlayer.isReadyToPlay` to signal buffering instead of just showing a stalled frame. Uses a completion handler to unlock UI as soon as possible for a smooth UX and scrolling experience.
-- **Looping**: `ReelPlayer` listens for `.AVPlayerItemDidPlayToEndTime` and seeks to `.zero`, avoiding `AVQueuePlayer` complexity while keeping memory predictable. I intentionally skipped `AVPlayerLooper` (which keeps multiple items queued and buffers them at the same time to manage looping) to reduce extra memory/CPU/network churn; the notification observer for `.AVPlayerItemDidPlayToEndTime` only exists while the reel is inside the active window and is torn down when it leaves.
+- **Looping**: `ReelPlayer` listens for `.AVPlayerItemDidPlayToEndTime` and uses `AVQueuePlayer` to ensure a 2 item queue for the active and neigboring reels that will ensure memory is kept a minimum while looping stays high quality and seamless. I intentionally skipped `AVPlayerLooper` (which keeps multiple items queued and buffers them at the same time to manage looping) to reduce extra memory/CPU/network churn; the notification observer for `.AVPlayerItemDidPlayToEndTime` only exists while the reel is inside the active window and is torn down when it leaves.
 
 ## Playback lifecycle, reuse, and memory
 - **Bounded pool**: Pool size 5 (2 ahead, 2 behind) ensures only a small set of `AVPlayer`/`AVPlayerItem` objects exist simultaneously ensuring smooth scrolling. Tradeoff: Reuse logic introduces complexity. Alternative would be to have a `AVPlayer`/`AVPlayerItem` per reel which would introduce chances of memory leaking when having to deinitialize a `AVPlayer`/`AVPlayerItem` object after every scroll, and require significantly higher CPU usage to do so resulting in laggy scrolling when doing quickly.
@@ -34,7 +34,7 @@ Architecture notes for the proof‑of‑concept infinitely scrolling reel feed w
 ## Responsiveness & transitions
 - **Smooth paging**: `.scrollTargetBehavior(.paging)` gives consistent snap without custom gesture tuning; animations on focus/placeholder/reactions use short `.easeOut` or spring responses to keep UI lively.
 - **Black‑frame avoidance**: Active reel change waits on readiness and blocks leaps past unready reels.
-- **Loop continuity**: Manual loop avoids flashes at end of item and keeps timeline stable during reuse.
+- **Loop continuity**: 2 item queues avoids flashes at end of item and keeps the reel high quality.
 
 ## Future expansions
 - Clean up code further so that `reels` and `activeReelId` isn't being duplicated to `ReelPlaybackCoordinator`
