@@ -3,7 +3,8 @@
 A proof of concept that shows infinitely scrolling reels with an inline messaging bar that expands up to 5 lines to fit text before allowing text scrolling. The app is sprinkled with animations and smooth transitions, and the backend has been written to intelligently use resources, so that CPU, network and memory usage are kept to a minimum.
 
 
-https://github.com/user-attachments/assets/b1d17fc5-ee48-4d71-bad4-26e657b69e37
+https://github.com/user-attachments/assets/d9468a02-76a3-497e-9568-80a4ee8e2d09
+
 
 
 # Getting Started
