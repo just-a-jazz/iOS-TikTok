@@ -37,6 +37,8 @@ Architecture notes for the proof‑of‑concept infinitely scrolling reel feed w
 - **Loop continuity**: 2 item queues avoids flashes at end of item and keeps the reel high quality.
 
 ## Future expansions
+- Ensure correct previews for each view
+- Add logic & UI tests
 - Clean up code further so that `reels` and `activeReelId` isn't being duplicated to `ReelPlaybackCoordinator`
 - Improve network resilience (retry, offline caching, HLS asset prewarming) and adopt `AVPlayerItemPreferredForwardBufferDuration` tuning per network conditions.
 - Tune scroll physics with a custom gesture recognizer to make "forced jump backs" back to currently loading reel feel smoother.
